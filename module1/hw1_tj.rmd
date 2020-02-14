@@ -1,0 +1,214 @@
+---
+title: "Assignment 1"
+author: "Tamiko Jenkins"
+date: "TFeb 09, 2020"
+output:
+  pdf_document: default
+  html_notebook: default
+  html_document: default
+subtitle: CUNY MSDS, Data 608
+---
+
+**Principles of Data Visualization and Introduction to ggplot2**
+
+I have provided you with data about the 5,000 fastest growing companies in the US, as compiled by Inc. magazine. lets read this in:
+
+```{r}
+
+inc <- read.csv("https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module1/Data/inc5000_data.csv", header= TRUE)
+
+```
+
+And lets preview this data:
+
+```{r}
+
+head(inc)
+
+```
+```{r}
+
+summary(inc)
+
+```
+
+Think a bit on what these summaries mean. Use the space below to add some more relevant non-visual exploratory information you think helps you understand this data:
+
+```{r}
+
+# Insert your code here, create more chunks as necessary
+
+
+# Import display libraries and set display options
+library("knitr")
+library("rmarkdown")
+knitr::opts_chunk$set(comment = NA)
+
+# Import main libraries 
+library("ggplot2")
+library("tidyverse")
+library("dplyr")
+
+
+library("psych")
+
+describe(inc)  
+
+```
+
+
+## Question 1
+
+Create a graph that shows the distribution of companies in the dataset by State (ie how many are in each state). There are a lot of States, so consider which axis you should use. This visualization is ultimately going to be consumed on a 'portrait' oriented screen (ie taller than wide), which should further guide your layout choices.
+
+### Arrange data
+```{r warnings=FALSE, messages=FALSE}
+
+# Answer Question 1 here 
+
+inc_state <- inc %>%
+  arrange(State)
+
+inc_state_count  <- inc_state %>%
+  count(State, sort=TRUE) %>%  
+  rename(Count=n) %>% 
+  arrange(Count) %>%
+  mutate(State = factor(State, State))
+
+```
+
+### Chart the default order and flip chart
+```{r warnings=FALSE, messages=FALSE}
+
+ggplot(inc_state, aes(x = factor(State), fill = State)) + 
+  geom_bar() +
+  geom_text(aes(label = ..count..), stat = "count", hjust = -6.5, colour = "black") +
+  coord_flip()
+
+```
+
+
+### Arrange by State Count and Remove Labels, Emphasize Count range
+```{r warnings=FALSE, messages=FALSE, fig.height='600px', fig.width='600px'}
+inc_state_count %>%
+  ggplot(aes(x = State, y = Count, fill=Count)) +
+  ggtitle("Distribution of Inc Companies by State") +
+  geom_bar(stat = 'identity', width=.9) +
+  geom_text(aes(label = ''), vjust = -1, hjust = -4.5, colour = "black") +
+  coord_fixed(ratio=4) +
+  coord_flip() +
+  theme(plot.title = element_text(size=20, face="bold", 
+    margin = margin(10, 0, 10, 0)),
+    axis.title.x = element_text(color="forestgreen", vjust=-0.35),
+    axis.title.y = element_text(color="cadetblue" , vjust=0.35),
+    panel.background = element_rect(fill = 'white'),
+    panel.grid.minor = element_line(colour = "lightgrey")
+  ) 
+  
+```
+
+### References:
+
+https://r-graphics.org/recipe-bar-graph-grouped-bar
+
+https://stackoverflow.com/a/54504480
+
+http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/
+
+
+
+## Quesiton 2
+
+Lets dig in on the state with the 3rd most companies in the data set. Imagine you work for the state and are interested in how many people are employed by companies in different industries. Create a plot that shows the average and/or median employment by industry for companies in this state (only use cases with full data, use R's `complete.cases()` function.) In addition to this, your graph should show how variable the ranges are, and you should deal with outliers.
+
+
+### Get the state with the third highest total numbers of Employees of all complete entries: New York
+```{r}
+# Answer Question 2 here
+inc_state_cc <- inc_state %>% filter(complete.cases(.)) 
+state_emp_counts <- inc_state_cc %>% count(State, sort=TRUE) 
+state_emp_counts %>% head(n=3)
+
+third <- state_emp_counts  %>%  slice(3) 
+third <- third[["State"]][1] %>% toString
+
+```
+
+###  Find the average number of employees in each industry in New York
+```{r}
+ny_avg_emp_ind <- inc_state_cc %>%
+  filter(State==third) %>%
+  group_by(Industry) %>%
+  mutate(avg_emp_ind = mean(Employees)) %>% 
+  arrange(Industry)
+```
+
+### Example of a company in each NY Industry with its employee average
+```{r}
+ny_avg_emp_ind[!duplicated(ny_avg_emp_ind$avg_emp_ind),]
+```
+
+Chart Display
+
+```{r}
+#graphics.off() 
+#par("mar") 
+#par(mar=c(1,1,1,1))
+```
+
+
+### Show boxplots with based on outlier removal equation
+```{r} 
+
+ny_emp_counts <- ny_avg_emp_ind %>% 
+  dplyr::select(Name, Employees, Industry, avg_emp_ind) %>%
+  group_by(Industry)  %>%  
+  filter(!(abs(Employees - median(Employees)) > 2*sd(Employees))) # Remove outliers, needs work
+
+ 
+ggplot(ny_emp_counts, aes(x=Industry, y=Employees)) + 
+  ggtitle("Industry Employee Averages and Ranges in New York") +
+  geom_boxplot(fill="chartreuse4") +  
+#  geom_text(aes(label = avg_emp_ind), colour = "black") +
+  coord_flip() 
+ 
+
+```
+ 
+ 
+### References:
+
+
+http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3/
+
+
+https://stackoverflow.com/questions/28687515/search-for-and-remove-outliers-from-a-dataframe-grouped-by-a-variable
+
+
+
+
+## Question 3
+
+Now imagine you work for an investor and want to see which industries generate the most revenue per employee. Create a chart that makes this information clear. Once again, the distribution per industry should be shown.
+
+```{r}
+
+# Answer Question 3 here
+
+ny_emp_rev_ind <- inc_state_cc %>% 
+  dplyr::select(Employees, Industry, Revenue) %>%
+  group_by(Industry)  %>%  
+  transmute(Rev_Emp=round(sum(Revenue)/sum(Employees))) %>% 
+  dplyr::select(Industry, Rev_Emp) 
+
+ 
+# To Do: Sort
+ggplot(ny_emp_rev_ind, aes(x=Industry, y=Rev_Emp)) + 
+  ggtitle("NY Industry Revenue per Employee") +
+  geom_bar(stat="identity") +
+  coord_flip() 
+ 
+
+```
+
+
