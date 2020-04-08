@@ -1,0 +1,240 @@
+---
+title: "Module 3"
+subtitle: "DATA 608"
+institute: "CUNY SPS, MS Data Science"
+author: "T. Jenkins"
+date: "2020" 
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    number_sections: yes
+    theme: paper
+always_allow_html: yes 
+--- 
+ 
+# Summary {.tabset}
+
+
+## Instructions
+I have provided you with data about mortality from all 50 states and the District of Columbia. Please access it at https://github.com/charleyferrari/CUNY_DATA608/tree/master/module3/data You are invited to gather more data from our provider, the CDC WONDER system, at https://wonder.cdc.gov/ucd-icd10.html.
+
+* This assignment must be done in R. It must be done using the ‘shiny’ package.
+
+* It is recommended you use an R package that supports interactive graphing such as
+plotly, or vegalite, but this is not required.
+
+* Your apps must be deployed, I won’t be accepting raw files. Luckily, you can pretty
+easily deploy apps with a free account at shinyapps.io
+
+
+## Load Environment 
+
+```{r knit-setup}
+library("knitr")
+library("rmarkdown")
+knitr::opts_chunk$set(comment = NA)
+```
+
+## Load Libraries
+
+```{r setup, warning=FALSE, message=FALSE}
+library(tidyverse)  
+library(dplyr)    
+library(tidyr)    
+library(tibble)      
+library(reshape2)   
+library(stringr)   
+
+library(plotly)
+library(shiny)
+library(rsconnect)
+```
+
+## Load Data
+```{r data, warning=FALSE, message=FALSE}
+df <- 
+    read.csv('https://raw.githubusercontent.com/charleyferrari/CUNY_DATA608/master/lecture3/data/cleaned-cdc-mortality-1999-2010-2.csv', header= TRUE, stringsAsFactors=TRUE)
+str(df)
+```
+
+
+# Question 1  {.tabset}
+
+Cause-based 2010 State Crude Mortality Rates  
+
+### Instructions
+
+As a researcher, you frequently compare mortality rates from particular causes across different States. You need a visualization that will let you see (for 2010 only) the crude mortality rate, across all States, from one cause (for example, Neoplasms, which are effectively cancers). Create a visualization that allows you to rank States by crude mortality for each cause of death.
+
+
+## Test1 Static Bar Chart
+
+Filter by year and COD, displaying all State COD data. Organize by State due to the number of states and the difficulty locating one if sorting by Crude Rate. 
+
+```{r test1}
+cod = "Neoplasms"
+pp1 <- df %>%
+  filter(., Year == "2010" & ICD.Chapter == cod) %>% # Filter by year and COD
+  arrange(desc(State), Crude.Rate)                   # Reverse the State order to flip axes
+
+head(pp1)
+
+chart1 <- pp1 %>%
+  plot_ly(x = ~pp1$Crude.Rate, y = pp1$State, type="bar", orientation="h") %>%
+  layout(
+          title= list(text=paste0(cod,"\ncause-based 2010 State Crude Mortality Rates"),
+                      font=list(size = 10)),
+    xaxis=list(title="Crude Rate"),
+    yaxis=list(title="States",
+      categoryorder = "array",
+      categoryarray = rev(~State))                    # Flip axes
+  )
+
+subplot(chart1)    
+
+```
+
+## Shiny1 Interactive Drop-Down and Bar Chart
+```{r shiny1, eval=FALSE}
+
+sidebarPanel(
+  selectInput("cod", label = "Cause of Death:",
+              choices = df$ICD.Chapter)
+)
+
+mainPanel( 
+  plotlyOutput('chart2') 
+)
+
+renderPlot({
+  pp1 <- df %>%
+    filter(., Year == "2010" & ICD.Chapter == input$cod) %>% # Filter by year and COD
+    arrange(desc(State), Crude.Rate)                   # Reverse the State order to flip axes
+  
+  chart1 <- pp1 %>%
+    plot_ly(x = ~pp1$Crude.Rate, y = pp1$State, type="bar", orientation="h") %>%
+    layout(
+          title= list(text=paste0(input$cod,"\ncause-based 2010 State Crude Mortality Rates"),
+                      font=list(size = 10)),
+          xaxis=list(title="Crude Rate"),
+          yaxis=list(title="States",
+            categoryorder = "array",
+            categoryarray = rev(~State))               # Flip axes
+        )
+  
+  subplot(chart1)    
+})
+
+```
+
+## References
+
+*  https://wonder.cdc.gov/wonder/help/ucd.html#Rates
+
+*  https://plotly-r.com/bars-histograms.html
+
+*  https://www.musgraveanalytics.com/blog/2018/7/24/how-to-order-a-plotly-bar-chart-in-r
+
+*  https://plotly.com/r/axes/#categorical-axes
+
+*  https://www.musgraveanalytics.com/blog/2018/7/24/how-to-order-a-plotly-bar-chart-in-r
+
+
+# Question 2  {.tabset}
+Comparing Crude Death Rates by Cause and Year  
+
+### Instructions
+Often you are asked whether particular States are improving their mortality rates (per cause) faster than, or slower than, the national average. Create a visualization that lets your clients see this for themselves for one cause of death at the time. Keep in mind that the national average should be weighted by the national population.
+
+
+## Test2 Static Bar Chart
+```{r test2}
+cod = "Certain infectious and parasitic diseases"
+pp2 <- df %>%
+  group_by(Year, ICD.Chapter) %>%                                        # Group by year
+  filter(ICD.Chapter == cod) %>%                                         # Filter by Cause of Death
+  mutate(US.Crude.Rate = round(
+    sum(Deaths) / sum(Population) * 100000),3) %>%                       # Create National Crude Rate per Year per CDC
+                                                                         #https://wonder.cdc.gov/wonder/help/ucd.html#Rates
+  group_by(Year, ICD.Chapter, State)
+head(pp2)
+ 
+state="AL"
+chart2 <- pp2 %>%
+  as_tibble()  %>% 
+  filter(., State == state) %>% 
+  select(., Year, Crude.Rate, US.Crude.Rate) %>%
+  plot_ly(x = ~Year, y = ~Crude.Rate, type='bar',
+          text = ~Crude.Rate, textposition = 'auto',
+          marker = list(color = 'rgb(158,202,225)'), 
+          name = 'State') %>%                                 # Chart State and US Crude Rates next to one another
+  add_trace(x = ~Year, y = ~US.Crude.Rate, type='bar',        #https://plotly.com/chart-studio-help/documentation/r/bar-charts/
+            text = ~US.Crude.Rate, textposition = 'auto',
+            marker = list(color = 'rgb(58,200,225)'), name = 'US')  %>%
+  layout(
+          title= list(text=paste0(cod,"\ncause-based State and US Crude Death Rates by Year\nfor ",state),
+                      font=list(size = 10)),
+           barmode = 'group',
+           xaxis = list(title = "Year"),
+           yaxis = list(title = "Crude Death Rate"))
+
+subplot(chart2)
+
+ 
+```
+
+## Shiny2: Drop Down and Interactive Comparison Bar Chart
+
+```{r shiny2 , eval=FALSE} 
+ 
+sidebarPanel(
+  selectInput("state", "State:", 
+              choices=df$State),
+  selectInput("cod", "Cause of Death:", 
+              choices=df$ICD.Chapter) 
+)
+
+mainPanel( 
+  plotlyOutput('chart2') 
+)
+
+renderPlot({ 
+  pp2 <- df %>%
+    group_by(Year, ICD.Chapter) %>%                                      
+    filter(ICD.Chapter == input$cod) %>%                                       
+    mutate(US.Crude.Rate = round(
+      sum(Deaths) / sum(Population) * 100000),3) %>%                        
+    group_by(Year, ICD.Chapter, State)
+  
+  
+  chart2 <- pp2 %>%
+    as_tibble()  %>% 
+    filter(., State == input$state) %>% 
+    select(., Year, Crude.Rate, US.Crude.Rate) %>%
+    plot_ly(x = ~Year, y = ~Crude.Rate, type='bar',
+            text = ~Crude.Rate, textposition = 'auto',
+            marker = list(color = 'rgb(158,202,225)'), 
+            name = 'State') %>%                                 
+    add_trace(x = ~Year, y = ~US.Crude.Rate, type='bar',        
+              text = ~US.Crude.Rate, textposition = 'auto',
+              marker = list(color = 'rgb(58,200,225)'), name = 'US')  %>%
+    layout(
+      title= list(text=paste0(input$cod,"\ncause-based State and US Crude Death Rates by Year\nfor ",input$state),
+                  font=list(size = 10)),
+      barmode = 'group',
+      xaxis = list(title = "Year"),
+      yaxis = list(title = "Crude Death Rate"))
+  
+  subplot(chart2)
+})
+    
+```
+
+## ShinyWidget
+
+I am still working on the display of Shiny in R Studio R Markdown Files
+
+
+https://bookdown.org/yihui/rmarkdown/shiny-widgets.html#the-shinyapp-function

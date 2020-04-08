@@ -1,0 +1,10 @@
+name: shinyapp1
+title:
+username:
+account: tj924
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2077551
+bundleId: 2984333
+url: https://tj924.shinyapps.io/shinyapp1/
+when: 1586310541.23267
