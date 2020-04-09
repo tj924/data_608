@@ -6,22 +6,21 @@
         <title>Data 608, Module 5, Jenkins</title>
         <link href="styles.css" rel="stylesheet" type="text/css">
         <style>
-        #main {margin: auto; padding: 0 20%;}
-        #one, #two, #three {display: block; width: 100%; float:; left; clear:both;}
-        #presidents {float:left; width: 35%;}
-        #stats-box {float:right; width: 60%;}
-        #scramble, #tables, #stats {width: 60%; float: right; border: dashed 1px #778899; padding: 1em 0; text-align: center; display: inline-block;}
-        #tables td {border: 1px pink dotted; padding: 7px;}
-        #tables table {margin:auto;}
-        label {width: 90%; float: left;}
-        input {width: 20%; float: left;}
-
+            #main {margin: auto; padding: 0 20%;}
+            #one, #two {display: block; position: relative; width: 100%; float: left; clear:both;}
+            #presidents {float:left; width: 35%;}
+            #stats-box {float:right; width: 60%;}
+            #scramble, #tables, #stats {width: 60%; float: right; border: dashed 1px #778899; padding: 1em 0; text-align: center; display: inline-block;}
+            #tables td {border: 1px pink dotted; padding: 7px;}
+            #tables table {margin:auto;}
+            label {width: 90%; float: left;}
+            input {float: left;}
         </style>
     </head>
     <body>
-
         <div id="main">
             <h1>Module 5</h1>
+            <p>Data 608, Module 5, Jenkins</p>
 
 
             <div id="one">
@@ -34,25 +33,24 @@
                 Refer to the file 'js_in_webpage.html' on the github page for instructions on setting up
                 javascript to run on an HTML page, and how to run/debug.</p>
 
-                <p>You should complete both of these in 2 (or more) functions on one HTML page
-                <ul>
-                <li>Create a function to reverse any word that you type in. This can be typed into either an input
-                box or an alert box, and then print the result in a box or on the webpage.</li>
-                <li>Create a function that takes an input number, and prints a table with the first 20 multiples of
-                the number, in order 5x4</li>
-                </ul>
-                example: type in 2 and it results in:<br>
-                <code>
-                <table>
-                <tr><td>2</td><td>4</td><td>6</td><td>8</td></tr>
-                <tr><td>10</td><td>12</td><td>14</td><td>16</td></tr>
-                <tr><td>18</td><td>20</td><td>22</td><td>24</td></tr>
-                <tr><td>26</td><td>28</td><td>30</td><td>32</td></tr>
-                <tr><td>34</td><td>36</td><td>38</td><td>40</td></tr>
-                </table>
-                </code>
+                <div>You should complete both of these in 2 (or more) functions on one HTML page
+                    <ul>
+                        <li>Create a function to reverse any word that you type in. This can be typed into either an input
+                        box or an alert box, and then print the result in a box or on the webpage.</li>
+                        <li>Create a function that takes an input number, and prints a table with the first 20 multiples of
+                        the number, in order 5x4</li>
+                    </ul>
+                    example: type in 2 and it results in:<br>
 
-                </p>
+                    <table>
+                        <tr><td>2</td><td>4</td><td>6</td><td>8</td></tr>
+                        <tr><td>10</td><td>12</td><td>14</td><td>16</td></tr>
+                        <tr><td>18</td><td>20</td><td>22</td><td>24</td></tr>
+                        <tr><td>26</td><td>28</td><td>30</td><td>32</td></tr>
+                        <tr><td>34</td><td>36</td><td>38</td><td>40</td></tr>
+                    </table>
+
+                </div>
                 <div id="scramble-box">
                     <h2>Scramble</h2>
                     <label>Text</label>
@@ -63,7 +61,7 @@
                 <div id="tables-box">
                     <h2>Tables</h2>
                     <label>Small Numbers</label>
-                    <input id="number" placeholder="A number" cols="10" rows="5"></input>
+                    <input type="number" id="number" placeholder="A number">
                     <p id="tables"></p>
                 </div>
             </div>
@@ -87,62 +85,49 @@
                 <div id="presidents"></div>
 
                 <div id="stats-box">
-                    <h2>Stats</h2>
-                    <label>Presidential Stats</label>
-                    <input id="names" placeholder="A president name" cols="20" rows="5"></input>
+                    <h2>Find Stats</h2>
+                    <label>President Name</label>
+                    <input type="text" id="names" placeholder="A name"
+                           maxlength="20" size="20">
                     <p id="stats"></p>
                 </div>
-
-            </div>
-            <div id="three">
-                <h2>Part 3:</h2>
-                <p>This is one of three homework assignments you can complete for this week (you must do
-                two, you may do all three for extra credit). Use the flask API you designed in module 4.5 to
-                display some sort of information based on user input. D3.json will allow you to read json
-                directly from a url.</p><p>
-                Create an app that takes in some user input, and returns some sort of information from the
-                trees dataset.</p><p>
-                This is geared towards those of you who have worked with javascript before and want a
-                challenge.</p><p>
-                Deployment: Your apps from parts 1 and 2 must be deployed. There are a lot of options for
-                deploying javascript apps, however I would recommend using github pages. Read more
-                about how github pages work here: https://pages.github.com/</p><p>
-                Part 3 includes a flask app, so don’t worry about deployment. Just submit your flask app,
-                your html file, and js files if required.</p>
-
-
             </div>
         </div>
 
-
         <script src="https://d3js.org/d3.v5.min.js"></script>
-
         <script>
-            'use strict';
+            "use strict";
 
             //Part 1
 
             // https://medium.com/@ysmiracle/use-addeventlistener-instead-of-onclick-oninput-onchange-especially-when-working-in-teams-50ad40badb8d
+            // https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
 
-            let typing = document.getElementById('typing');
+            let typing = document.getElementById("typing");
 
-            typing.addEventListener('input', function()  {
-                scramble.innerHTML =  [...this.value].reverse().join('');
+            typing.addEventListener("input", function(el)  {
+                const text_input = el.target.value || "";
+                scramble.innerHTML =  [...text_input].reverse().join("");
             });
 
-
-            // https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
             // Meant to use ES6 webcomponents but used regex instead.
-
-            const number = document.getElementById('number');
-            number.addEventListener('input', function() {
-                this.boundSayHello = evt => this.value;
-                const seed_num = parseInt(this.value)
-                const numbers = [...Array(seed_num*21).keys()].filter(num => num%seed_num==0 && num>=seed_num);
-                const tds = '<td>'+numbers.join('</td><td>')+'</td>'
-                const trs = '<tr>' + [...tds.matchAll('<td>.*?<\/td><td>.*?<\/td><td>.*?<\/td><td>.*?<\/td>')].map(el => el[0]).join('</tr><tr>') + '</tr>'
-                const table = '<table>' + trs + '</table>'
+            const number = document.getElementById("number");
+            number.addEventListener("input", function(el) {
+            try {
+                const number_input = el.target.value;
+                const sign = (parseInt(number_input) < 0) ? -1 : 1;
+                const seed_num = parseInt(number_input) * sign;
+                const gen_num = [...Array(seed_num*21).keys()].filter(num => num%seed_num==0 && num>=seed_num);
+                const numbers = gen_num.map(el => el*sign);
+                const tds = "<td>"+numbers.join("</td><td>")+"</td>";
+                const trs = "<tr>" + [...tds.matchAll("<td>.*?<\/td><td>.*?<\/td><td>.*?<\/td><td>.*?<\/td>")].map(el => el[0]).join("</tr><tr>") + "</tr>";
+                const table = "<table>" + trs + "</table>"
                 tables.innerHTML = table;
+                return false;
+            } catch {
+                tables.innerHTML = "";
+                return false;
+            }
             });
 
             // Part 2
@@ -150,36 +135,33 @@
             // https://stackoverflow.com/questions/42285441/how-to-read-in-csv-with-d3-v4
             // https://d3-wiki.readthedocs.io/zh_CN/master/CSV/
             // https://stackoverflow.com/questions/52807271/d3-js-updating-from-v3-to-v5
-            //https://stackoverflow.com/questions/14514776/updating-an-html-table-in-d3-js-using-a-reusable-chart
-            //https://stackoverflow.com/questions/43940850/how-to-iterate-through-table-tr-and-get-the-value-for-first-td-javascript
+            // https://stackoverflow.com/questions/14514776/updating-an-html-table-in-d3-js-using-a-reusable-chart
+            // https://stackoverflow.com/questions/43940850/how-to-iterate-through-table-tr-and-get-the-value-for-first-td-javascript
 
             var file = "https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module5/data/presidents.csv";
 
             var data = d3.csv(file).then(function(data) {
-                    //console.log(data);
-                    //console.log(JSON.stringify(data));
-
-                    var table = d3.select('#presidents').append('table');
+                    var table = d3.select("#presidents").append("table");
                     var titles = d3.keys(data[0]);
-                    var headers = table.append('thead').append('tr')
-                                   .selectAll('th')
+                    var headers = table.append("thead").append("tr")
+                                   .selectAll("th")
                                    .data(titles).enter()
-                                   .append('th')
+                                   .append("th")
                                    .text(function (d) {
                                         return d;
                                     });
 
-                    var rows = table.append('tbody').selectAll('tr')
+                    var rows = table.append("tbody").selectAll("tr")
                                .data(data).enter()
-                               .append('tr');
-                    rows.selectAll('td')
+                               .append("tr");
+                    rows.selectAll("td")
                     .data(function (d) {
                         return titles.map(function (k) {
-                            return { 'value': d[k], 'name': k};
+                            return { "value": d[k], "name": k};
                         });
                     }).enter()
-                    .append('td')
-                    .attr('data-th', function (d) {
+                    .append("td")
+                    .attr("data-th", function (d) {
                         return d.name;
                     })
                     .text(function (d) {
@@ -187,23 +169,27 @@
                     });
                 })
                 .then(function(data) {
-                    let presidents = document.getElementById('presidents');
-                    let names = document.getElementById('names');
+                    let presidents = document.getElementById("presidents");
+                    let names = document.getElementById("names");
 
-                    names.addEventListener('input', function(data)  {
-                        let rows_ = presidents.querySelectorAll('tr');// > td:first-child');
+                    names.addEventListener("input", function(el,data)  {
+                        let search_input = el.target.value || "";
+                        let rows_ = presidents.querySelectorAll("tr");
 
-                        rows_.forEach(function(row_, i) {
+                        for (const [i, row_] of rows_.entries()) {
+                            let names_ = row_.querySelectorAll("td:first-child");
 
-                            let names_ = row_.querySelectorAll('td:first-child');
-
-                            names_.forEach(function(name_, i) {
-                            if (name_.innerText === this.value||'') {
-                                    let stats_msg = 'Height and Weight for:\n' + row_.innerText || '';
-                                    stats.innerHTML = stats.innerText || '' + '\n' + stats_msg;
+                            for (const [j, name_] of names_.entries()) {
+                                if (name_.innerText === search_input) {
+                                        let stats_msg = "Height and Weight for\n" + row_.innerText || "";
+                                        stats.innerHTML = stats_msg;
+                                        //console.log(search);
+                                        return false;
+                                } else {
+                                    stats.innerHTML = "";
                                 }
-                            });
-                        });
+                            };
+                        };
                     });
                 })
                 .catch(console.log.bind(console));
