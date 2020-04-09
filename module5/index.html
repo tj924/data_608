@@ -110,7 +110,7 @@
 
             // Create 20 multiples of any number besides 0
             // from the numbers input and display it in the
-            // tables section.
+            // tables section (DOM).
             // Meant to use ES6 webcomponents but used regex instead.
             const number = document.getElementById("number");
             number.addEventListener("input", function(el) {
@@ -119,8 +119,8 @@
                     const sign = (parseInt(number_input) < 0) ? -1 : 1;
                     // Remove the negative from the number input
                     const seed_num = parseInt(number_input) * sign;
-                    // Generate a list of all numbers up to the 21th multiple
-                    // Filter out non-multiple
+                    // Generate a list of all numbers up to the 21st multiple
+                    // Filter out non-multiples, removing 0, resulting in 20 multiples
                     const gen_num = [...Array(seed_num*21).keys()].filter(num => num%seed_num==0 && num>=seed_num);
                     // Add back the sign
                     const numbers = gen_num.map(el => el*sign);
