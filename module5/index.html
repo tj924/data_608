@@ -7,13 +7,13 @@
         <link href="styles.css" rel="stylesheet" type="text/css">
         <style>
             #main {margin: auto; padding: 0 20%;}
-            #one, #two {display: block; position: relative; width: 100%; float: left; clear:both;}
+            #one, #two {display: block; position: relative; float: left; clear: both; width: 100%;}
+            #scramble, #tables, #stats {display: inline-block; float: right; width: 60%; padding: 1em 0; text-align: center; border: dashed 1px #778899;}
             #presidents {float:left; width: 35%;}
             #stats-box {float:right; width: 60%;}
-            #scramble, #tables, #stats {width: 60%; float: right; border: dashed 1px #778899; padding: 1em 0; text-align: center; display: inline-block;}
-            #tables td {border: 1px pink dotted; padding: 7px;}
-            #tables table {margin:auto;}
-            label {width: 90%; float: left;}
+            #tables table {margin: auto;}
+            #tables td {padding: 7px; border: 1px pink dotted;}
+            label {float: left; width: 90%;}
             input {float: left;}
         </style>
     </head>
@@ -21,10 +21,8 @@
         <div id="main">
             <h1>Module 5</h1>
             <p>Data 608, Module 5, Jenkins</p>
-
-
             <div id="one">
-            <h2>Part 1:</h2>
+                <h2>Part 1:</h2>
                 <p>This is one of three homework assignments you can complete for this week (you must do
                 two, you may do all three for extra credit). This is geared towards those of you who have
                 never worked with javascript before.</p>
@@ -60,14 +58,13 @@
 
                 <div id="tables-box">
                     <h2>Tables</h2>
-                    <label>Small Numbers</label>
+                    <label>Numbers</label>
                     <input type="number" id="number" placeholder="A number">
                     <p id="tables"></p>
                 </div>
             </div>
 
             <div id="two">
-
                 <h2>Part 2:</h2>
                 <p>This is one of three homework assignments you can complete for this week (you must do
                 two, you may do all three for extra credit). This is geared towards those of you who have
@@ -98,36 +95,48 @@
         <script>
             "use strict";
 
-            //Part 1
+            // Part 1
 
             // https://medium.com/@ysmiracle/use-addeventlistener-instead-of-onclick-oninput-onchange-especially-when-working-in-teams-50ad40badb8d
             // https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
 
-            let typing = document.getElementById("typing");
-
+            // Reverse any text in the typing textarea
+            // Display it in the scramble paragraph (DOM)
+            const typing = document.getElementById("typing");
             typing.addEventListener("input", function(el)  {
                 const text_input = el.target.value || "";
                 scramble.innerHTML =  [...text_input].reverse().join("");
             });
 
+            // Create 20 multiples of any number besides 0
+            // from the numbers input and display it in the
+            // tables section.
             // Meant to use ES6 webcomponents but used regex instead.
             const number = document.getElementById("number");
             number.addEventListener("input", function(el) {
-            try {
-                const number_input = el.target.value;
-                const sign = (parseInt(number_input) < 0) ? -1 : 1;
-                const seed_num = parseInt(number_input) * sign;
-                const gen_num = [...Array(seed_num*21).keys()].filter(num => num%seed_num==0 && num>=seed_num);
-                const numbers = gen_num.map(el => el*sign);
-                const tds = "<td>"+numbers.join("</td><td>")+"</td>";
-                const trs = "<tr>" + [...tds.matchAll("<td>.*?<\/td><td>.*?<\/td><td>.*?<\/td><td>.*?<\/td>")].map(el => el[0]).join("</tr><tr>") + "</tr>";
-                const table = "<table>" + trs + "</table>"
-                tables.innerHTML = table;
-                return false;
-            } catch {
-                tables.innerHTML = "";
-                return false;
-            }
+                try {
+                    const number_input = el.target.value;
+                    const sign = (parseInt(number_input) < 0) ? -1 : 1;
+                    // Remove the negative from the number input
+                    const seed_num = parseInt(number_input) * sign;
+                    // Generate a list of all numbers up to the 21th multiple
+                    // Filter out non-multiple
+                    const gen_num = [...Array(seed_num*21).keys()].filter(num => num%seed_num==0 && num>=seed_num);
+                    // Add back the sign
+                    const numbers = gen_num.map(el => el*sign);
+                    // Create the table
+                    const tds = "<td>"+numbers.join("</td><td>")+"</td>";
+                    const trs = "<tr>" + [...tds.matchAll("<td>.*?<\/td><td>.*?<\/td><td>.*?<\/td><td>.*?<\/td>")].map(el => el[0]).join("</tr><tr>") + "</tr>";
+                    const table = "<table>" + trs + "</table>"
+                    // Inject the table into the tables section
+                    tables.innerHTML = table;
+                    return false;
+                // Remove any previously displayed tables if
+                // an invalid input is given, such as 0
+                } catch {
+                    tables.innerHTML = "";
+                    return false;
+                }
             });
 
             // Part 2
@@ -137,10 +146,14 @@
             // https://stackoverflow.com/questions/52807271/d3-js-updating-from-v3-to-v5
             // https://stackoverflow.com/questions/14514776/updating-an-html-table-in-d3-js-using-a-reusable-chart
             // https://stackoverflow.com/questions/43940850/how-to-iterate-through-table-tr-and-get-the-value-for-first-td-javascript
+            // http://datawanderings.com/2018/08/15/d3-js-v5-promise-syntax-examples/
 
-            var file = "https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module5/data/presidents.csv";
-
+            const file = "https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module5/data/presidents.csv";
+            // Use the promise format from d3 v5 to read in
+            // a csv, display it in a table, and display a query result.
             var data = d3.csv(file).then(function(data) {
+                    // Use boilerplate code from resource links
+                    // Wrap csv data in a table and append to presidents section (DOM)
                     var table = d3.select("#presidents").append("table");
                     var titles = d3.keys(data[0]);
                     var headers = table.append("thead").append("tr")
@@ -169,22 +182,24 @@
                     });
                 })
                 .then(function(data) {
-                    let presidents = document.getElementById("presidents");
-                    let names = document.getElementById("names");
-
+                    const presidents = document.getElementById("presidents");
+                    const names = document.getElementById("names");
+                    // Loop through rows and cells to look for the
+                    // inputted search for a presidents name, on the fly
                     names.addEventListener("input", function(el,data)  {
-                        let search_input = el.target.value || "";
-                        let rows_ = presidents.querySelectorAll("tr");
+                        const search_input = el.target.value || "";
+                        const rows_ = presidents.querySelectorAll("tr");
 
                         for (const [i, row_] of rows_.entries()) {
-                            let names_ = row_.querySelectorAll("td:first-child");
-
+                            const names_ = row_.querySelectorAll("td:first-child");
+                            // If the input name is found in the table
+                            // Display the corresponding row and break loop to return
                             for (const [j, name_] of names_.entries()) {
                                 if (name_.innerText === search_input) {
-                                        let stats_msg = "Height and Weight for\n" + row_.innerText || "";
-                                        stats.innerHTML = stats_msg;
-                                        //console.log(search);
-                                        return false;
+                                    const stats_msg = "Height and Weight for\n" + row_.innerText || "";
+                                    stats.innerHTML = stats_msg;
+                                    return false;
+                                // Clear the results if the nothing inputted matches
                                 } else {
                                     stats.innerHTML = "";
                                 }
