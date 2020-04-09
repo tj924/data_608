@@ -119,8 +119,8 @@
                     const sign = (parseInt(number_input) < 0) ? -1 : 1;
                     // Remove the negative from the number input
                     const seed_num = parseInt(number_input) * sign;
-                    // Generate a list of all numbers up to the 21st multiple
-                    // Filter out non-multiples, removing 0, resulting in 20 multiples
+                    // Generate a list of all numbers up to the 21st multiple, exclusive
+                    // Filter out non-multiples, removing 0 index
                     const gen_num = [...Array(seed_num*21).keys()].filter(num => num%seed_num==0 && num>=seed_num);
                     // Add back the sign
                     const numbers = gen_num.map(el => el*sign);
@@ -132,7 +132,7 @@
                     tables.innerHTML = table;
                     return false;
                 // Remove any previously displayed tables if
-                // an invalid input is given, such as 0
+                // an invalid input, such as 0, is given
                 } catch {
                     tables.innerHTML = "";
                     return false;
@@ -192,14 +192,14 @@
 
                         for (const [i, row_] of rows_.entries()) {
                             const names_ = row_.querySelectorAll("td:first-child");
-                            // If the input name is found in the table
+                            // If the inputted name is found in the table
                             // Display the corresponding row and break loop to return
                             for (const [j, name_] of names_.entries()) {
                                 if (name_.innerText === search_input) {
                                     const stats_msg = "Height and Weight for\n" + row_.innerText || "";
                                     stats.innerHTML = stats_msg;
                                     return false;
-                                // Clear the results if the nothing inputted matches
+                                // Clear the results if the nothing inputted matches a president name
                                 } else {
                                     stats.innerHTML = "";
                                 }
