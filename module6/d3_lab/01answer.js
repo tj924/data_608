@@ -10,7 +10,7 @@ d3.csv("ue_industry.csv", data => {
         .range([580, 20]);
 
     const dataset = data
-        .filter(row => Number.isInteger(+row.Agriculture | NaN))
+        .filter(row => Number.isInteger(+row.Agriculture || NaN))
         .map(row =>({
                 "x": +row.index,
                 "y": +row.Agriculture
